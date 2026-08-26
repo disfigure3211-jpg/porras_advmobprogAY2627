@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../constants.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 import '../services/cart_service.dart';
 import '../services/product_service.dart';
+import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 import 'product_detail_screen.dart';
 
@@ -25,12 +25,19 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    _cartFuture = CartService().getCartByUser(cartUserId);
+    _cartFuture = _loadCurrentUserCart();
+  }
+
+  // Enhancement 3: User model and user-based cart.
+  // Retrieves the authenticated user's ID and loads only that user's cart.
+  Future<Cart?> _loadCurrentUserCart() async {
+    final user = await UserService().getUser();
+    return CartService().getCartByUser(user.id);
   }
 
   void _retry() {
     setState(() {
-      _cartFuture = CartService().getCartByUser(cartUserId);
+      _cartFuture = _loadCurrentUserCart();
     });
   }
 
@@ -160,7 +167,9 @@ class _CartScreenState extends State<CartScreen> {
                                       onPressed: () =>
                                           _changeQuantity(product, -1),
                                       icon: const Icon(Icons.remove),
-                                      color: Colors.pinkAccent,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       visualDensity: VisualDensity.compact,
                                     ),
                                     Text(
@@ -174,7 +183,9 @@ class _CartScreenState extends State<CartScreen> {
                                       onPressed: () =>
                                           _changeQuantity(product, 1),
                                       icon: const Icon(Icons.add),
-                                      color: Colors.pinkAccent,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       visualDensity: VisualDensity.compact,
                                     ),
                                   ],

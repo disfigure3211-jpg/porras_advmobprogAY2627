@@ -9,6 +9,9 @@ import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/signin_screen.dart';
+import 'screens/splash_screen.dart';
 
 // providers
 import 'providers/theme_provider.dart';
@@ -46,10 +49,15 @@ class PorrasAdvMobProg extends StatelessWidget {
             theme: themeModel.lightTheme,
             darkTheme: themeModel.darkTheme,
             themeMode: themeModel.isDark ? ThemeMode.dark : ThemeMode.light,
-            title: 'E-Commerce App',
-            initialRoute: '/home',
+            title: dotenv.isInitialized
+                ? dotenv.env['APP_NAME'] ?? 'NubDexChange'
+                : 'NubDexChange',
+            initialRoute: '/splash',
             routes: {
+              '/splash': (context) => const SplashScreen(),
+              '/signin': (context) => const SignInScreen(),
               '/home': (context) => const HomeScreen(),
+              '/profile': (context) => const ProfileScreen(),
               '/cart': (context) => const CartScreen(),
               '/settings': (context) => const SettingsScreen(),
             },

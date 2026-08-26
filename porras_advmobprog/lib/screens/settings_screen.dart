@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../providers/theme_provider.dart';
 import '../widgets/custom_text.dart';
+import '../services/user_service.dart';
 
 // Enhancement 3: Settings page with Dark/Light theme switch moved here
 class SettingsScreen extends StatelessWidget {
@@ -19,7 +20,11 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomText(text: 'Appearance', fontSize: 18.sp, fontWeight: FontWeight.bold),
+            CustomText(
+              text: 'Appearance',
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
             SizedBox(height: 12.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -30,6 +35,23 @@ class SettingsScreen extends StatelessWidget {
                   onChanged: (_) => context.read<ThemeProvider>().toggleTheme(),
                 ),
               ],
+            ),
+            SizedBox(height: 24.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await UserService().logout();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/signin',
+                    (_) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Log Out'),
+              ),
             ),
           ],
         ),

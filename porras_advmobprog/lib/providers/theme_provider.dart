@@ -9,35 +9,38 @@ class ThemeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  ThemeData _blackPinkTheme({required bool isDark}) {
+  ThemeData _blackChromeTheme({required bool isDark}) {
+    const chrome = Color(0xFFC0C0C0);
+    const lightChrome = Color(0xFFE5E4E2);
+    const charcoal = Color(0xFF202020);
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: Colors.pink,
+      seedColor: chrome,
       brightness: isDark ? Brightness.dark : Brightness.light,
     );
     final backgroundColor = isDark ? Colors.black : Colors.white;
-    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final surfaceColor = isDark ? charcoal : lightChrome;
     final textColor = isDark ? Colors.white : Colors.black;
 
     return ThemeData(
       brightness: isDark ? Brightness.dark : Brightness.light,
       colorScheme: colorScheme.copyWith(
-        primary: Colors.pinkAccent,
-        secondary: Colors.pink,
+        primary: chrome,
+        secondary: lightChrome,
         surface: surfaceColor,
       ),
       scaffoldBackgroundColor: backgroundColor,
       cardColor: surfaceColor,
       appBarTheme: AppBarTheme(
-        backgroundColor: backgroundColor,
+        backgroundColor: isDark ? charcoal : chrome,
         foregroundColor: textColor,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: chrome,
         foregroundColor: Colors.black,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.pinkAccent,
+          backgroundColor: chrome,
           foregroundColor: Colors.black,
         ),
       ),
@@ -49,7 +52,7 @@ class ThemeProvider with ChangeNotifier {
     );
   }
 
-  ThemeData get lightTheme => _blackPinkTheme(isDark: false);
+  ThemeData get lightTheme => _blackChromeTheme(isDark: false);
 
-  ThemeData get darkTheme => _blackPinkTheme(isDark: true);
+  ThemeData get darkTheme => _blackChromeTheme(isDark: true);
 }

@@ -1,2 +1,1 @@
-## Lab Act 3 added a user-specific cart using DummyJSON’s API. The app displays cart products, supports quantity changes, allows products to open the existing detail screen, includes Add to Cart functionality, and hides the chat FloatingActionButton on the cart screen. The model, service, and screen are separated to keep the code organized, while the app uses a black-and-pink theme with light and dark modes.
-
+# Lab Activity 4 added persistent login using a User model, UserService, and SharedPreferences. The splash screen checks the saved session, while the sign-in and profile screens handle login, user information, and logout. The cart uses the logged-in user’s ID to display the correct products through DummyJSON’s API.
