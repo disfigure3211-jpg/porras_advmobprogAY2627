@@ -1,5 +1,2 @@
-# Launch Screen Assets
+## Lab Act 3 added a user-specific cart using DummyJSON’s API. The app displays cart products, supports quantity changes, allows products to open the existing detail screen, includes Add to Cart functionality, and hides the chat FloatingActionButton on the cart screen. The model, service, and screen are separated to keep the code organized, while the app uses a black-and-pink theme with light and dark modes.
 
-You can customize the launch screen with your own desired assets by replacing the image files in this directory.
-
-You can also do it by opening your Flutter project's Xcode project with `open ios/Runner.xcworkspace`, selecting `Runner/Assets.xcassets` in the Project Navigator and dropping in the desired images.

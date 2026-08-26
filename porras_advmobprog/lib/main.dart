@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 // screens
 import 'screens/home_screen.dart';
+import 'screens/cart_screen.dart';
 import 'screens/settings_screen.dart';
 
 // providers
@@ -15,18 +16,16 @@ import 'providers/theme_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
-    (
-      _,
-    ) async {
-      try {
-        await dotenv.load(fileName: 'assets/.env');
-      } catch (_) {
-        // Use the default API host when the optional local env file is absent.
-      }
-      runApp(const PorrasAdvMobProg());
-    },
-  );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
+    _,
+  ) async {
+    try {
+      await dotenv.load(fileName: 'assets/.env');
+    } catch (_) {
+      // Use the default API host when the optional local env file is absent.
+    }
+    runApp(const PorrasAdvMobProg());
+  });
 }
 
 class PorrasAdvMobProg extends StatelessWidget {
@@ -51,6 +50,7 @@ class PorrasAdvMobProg extends StatelessWidget {
             initialRoute: '/home',
             routes: {
               '/home': (context) => const HomeScreen(),
+              '/cart': (context) => const CartScreen(),
               '/settings': (context) => const SettingsScreen(),
             },
           );

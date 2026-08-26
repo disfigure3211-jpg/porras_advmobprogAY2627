@@ -18,6 +18,16 @@ class ProductService {
     }
   }
 
+  Future<Product> getById(int id) async {
+    final response = await http.get(Uri.parse('$host/products/$id'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load product $id');
+    }
+
+    return Product.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
   // Backwards-compatible alias used elsewhere in the repo
   Future<List<Product>> getAllProducts() => fetchProducts();
 }
