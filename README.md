@@ -2,6 +2,5 @@
 ## INF 233
 ## CTADMOBL Advance Mobile Programming
 
-A flutter project that focuses on advance topics. Covering the web to mobile transactions.
 
-## Lab Activity Instance
+## we added firebase function authentication and account creation. But we still use dummyjson/users.

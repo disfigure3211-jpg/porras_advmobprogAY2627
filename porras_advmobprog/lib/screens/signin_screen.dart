@@ -119,6 +119,16 @@ class _SignInScreenState extends State<SignInScreen> {
                           : const Text('Sign In'),
                     ),
                   ),
+                  SizedBox(height: 12.h),
+                  SizedBox(
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.pushNamed(context, '/signup'),
+                      child: const Text('Create an account'),
+                    ),
+                  ),
                 ],
               ),
             ),

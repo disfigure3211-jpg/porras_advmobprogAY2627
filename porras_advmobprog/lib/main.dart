@@ -11,13 +11,20 @@ import 'screens/cart_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/signin_screen.dart';
+import 'screens/signup_screen.dart';
 import 'screens/splash_screen.dart';
 
 // providers
 import 'providers/theme_provider.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'widgets/firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
     _,
@@ -56,6 +63,7 @@ class PorrasAdvMobProg extends StatelessWidget {
             routes: {
               '/splash': (context) => const SplashScreen(),
               '/signin': (context) => const SignInScreen(),
+              '/signup': (context) => const SignUpScreen(),
               '/home': (context) => const HomeScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/cart': (context) => const CartScreen(),

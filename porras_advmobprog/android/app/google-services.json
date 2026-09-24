@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "920214595305",
+    "project_id": "porras-advmobprog",
+    "storage_bucket": "porras-advmobprog.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920214595305:android:4b61139afdab35313c3278",
+        "android_client_info": {
+          "package_name": "com.example.porras_advmobprog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnutwHa1PIeedsESx2NBGSmzFUn-5QeMY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,6 +6,8 @@ class User {
   final String lastName;
   final String gender;
   final String image;
+  final String age;
+  final String contactNo;
   final String accessToken;
   final String refreshToken;
 
@@ -17,6 +19,8 @@ class User {
     required this.lastName,
     required this.gender,
     required this.image,
+    required this.age,
+    required this.contactNo,
     required this.accessToken,
     required this.refreshToken,
   });
@@ -30,6 +34,8 @@ class User {
       lastName: json['lastName'] as String? ?? '',
       gender: json['gender'] as String? ?? '',
       image: json['image'] as String? ?? '',
+      age: '${json['age'] ?? ''}',
+      contactNo: json['contactNo'] as String? ?? '',
       accessToken: (json['accessToken'] ?? json['token'] ?? '') as String,
       refreshToken: json['refreshToken'] as String? ?? '',
     );
@@ -43,6 +49,8 @@ class User {
     'lastName': lastName,
     'gender': gender,
     'image': image,
+    'age': age,
+    'contactNo': contactNo,
     'accessToken': accessToken,
     'refreshToken': refreshToken,
   };
