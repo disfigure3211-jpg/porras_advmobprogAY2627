@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'product_screen.dart';
 import 'cart_screen.dart';
+import 'chat_screen.dart';
 import 'profile_screen.dart';
 
 import '../widgets/custom_text.dart';
@@ -25,6 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = value;
     });
     _pageController.jumpToPage(value);
+  }
+
+  void _onTappedBottomBar(int value) {
+    const pageIndexes = [0, 1, 3];
+    _onTappedBar(pageIndexes[value]);
+  }
+
+  int get _bottomBarIndex {
+    if (_selectedIndex >= 2) return _selectedIndex == 2 ? 1 : 2;
+    return _selectedIndex;
   }
 
   @override
@@ -54,8 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   text: (_selectedIndex == 1)
                       ? 'Cart'
                       : (_selectedIndex == 2)
-                      ? 'Profile'
-                      : 'Home',
+                      ? 'Chats'
+                      : 'Profile',
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                 )),
@@ -72,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: const <Widget>[
             ProductScreen(),
             CartScreen(),
+            ChatScreen(),
             ProfileScreen(),
           ],
           onPageChanged: (page) {
@@ -80,29 +92,21 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         ),
-        // Enhancement 2: Hide the chat FloatingActionButton while
-        // the user is viewing the cart screen.
-        floatingActionButton: _selectedIndex == 1
-            ? null
-            : FloatingActionButton(
-                tooltip: 'Open chat',
-                onPressed: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (context) => const SafeArea(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text('Chat is available from this screen.'),
-                      ),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.chat),
-              ),
+        floatingActionButton: _selectedIndex == 0
+            ? FloatingActionButton(
+                onPressed: () => _onTappedBar(2),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                elevation: 6,
+                shape: const CircleBorder(),
+                child: const Icon(Icons.chat_bubble_outline),
+              )
+            : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: false,
           showUnselectedLabels: false,
-          onTap: _onTappedBar,
+          onTap: _onTappedBottomBar,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.shop_2), label: 'Shop'),
             BottomNavigationBarItem(
@@ -111,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
-          currentIndex: _selectedIndex,
+          currentIndex: _bottomBarIndex,
         ),
       ),
     );

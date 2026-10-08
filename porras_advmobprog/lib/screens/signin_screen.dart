@@ -15,14 +15,15 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _credentialController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String _loginType = 'firebase';
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _credentialController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -31,11 +32,43 @@ class _SignInScreenState extends State<SignInScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      final userData = await UserService().loginUser(
-        _usernameController.text.trim(),
-        _passwordController.text,
-      );
-      await UserService().saveUserData(userData);
+      if (_loginType == 'dummyjson') {
+        final username = _credentialController.text.trim();
+        final userData = await UserService().loginUser(
+          username,
+          _passwordController.text,
+        );
+        await UserService().saveUserData({
+          ...userData,
+          'loginType': 'dummyjson',
+        });
+      } else {
+        final email = _credentialController.text.trim();
+        final password = _passwordController.text;
+        final credential = await signIn(email: email, password: password);
+        final firebaseUser = credential.user;
+        if (firebaseUser == null) {
+          throw Exception('Firebase sign-in returned no user');
+        }
+
+        final username = firebaseUser.displayName ??
+            email.split('@').first;
+        await UserService().saveUserData({
+          'id': firebaseUser.uid.hashCode,
+          'username': username,
+          'email': firebaseUser.email ?? email,
+          'firstName': '',
+          'lastName': '',
+          'gender': '',
+          'image': firebaseUser.photoURL ?? '',
+          'age': '',
+          'contactNo': '',
+          'accessToken': firebaseUser.uid,
+          'refreshToken': '',
+          'loginType': 'firebase',
+        });
+        await UserService().syncFirebaseUserProfile();
+      }
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
     } catch (_) {
@@ -76,15 +109,52 @@ class _SignInScreenState extends State<SignInScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 32.h),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment<String>(
+                        value: 'firebase',
+                        label: Text('Firebase'),
+                        icon: Icon(Icons.security),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'dummyjson',
+                        label: Text('DummyJSON'),
+                        icon: Icon(Icons.api),
+                      ),
+                    ],
+                    selected: {_loginType},
+                    onSelectionChanged: (selection) {
+                      setState(() => _loginType = selection.first);
+                    },
+                  ),
+                  SizedBox(height: 16.h),
                   TextFormField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      prefixIcon: Icon(Icons.person),
+                    controller: _credentialController,
+                    keyboardType: _loginType == 'firebase'
+                        ? TextInputType.emailAddress
+                        : TextInputType.text,
+                    decoration: InputDecoration(
+                      labelText: _loginType == 'firebase' ? 'Email' : 'Username',
+                      prefixIcon: Icon(
+                        _loginType == 'firebase'
+                            ? Icons.email
+                            : Icons.person,
+                      ),
                     ),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Enter your username'
-                        : null,
+                    validator: (value) {
+                      final input = value?.trim() ?? '';
+                      if (input.isEmpty) {
+                        return _loginType == 'firebase'
+                            ? 'Enter your email'
+                            : 'Enter your username';
+                      }
+                      if (_loginType == 'firebase' &&
+                          !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                              .hasMatch(input)) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
                   ),
                   SizedBox(height: 16.h),
                   TextFormField(

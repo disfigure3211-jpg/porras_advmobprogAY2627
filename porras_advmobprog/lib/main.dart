@@ -1,4 +1,5 @@
 // packages
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,6 +11,7 @@ import 'screens/home_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/chat_screen.dart';
 import 'screens/signin_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/splash_screen.dart';
@@ -22,6 +24,16 @@ import 'widgets/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter error: ${details.exceptionAsString()}', wrapWidth: 1024);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Unhandled error: $error', wrapWidth: 1024);
+    return true;
+  };
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -67,6 +79,7 @@ class PorrasAdvMobProg extends StatelessWidget {
               '/home': (context) => const HomeScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/cart': (context) => const CartScreen(),
+              '/chat': (context) => const ChatScreen(),
               '/settings': (context) => const SettingsScreen(),
             },
           );

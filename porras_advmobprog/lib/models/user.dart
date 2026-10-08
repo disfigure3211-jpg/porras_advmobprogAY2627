@@ -10,6 +10,7 @@ class User {
   final String contactNo;
   final String accessToken;
   final String refreshToken;
+  final String loginType;
 
   const User({
     required this.id,
@@ -23,11 +24,24 @@ class User {
     required this.contactNo,
     required this.accessToken,
     required this.refreshToken,
+    this.loginType = 'firebase',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'];
+    int parsedId;
+    if (rawId is int) {
+      parsedId = rawId;
+    } else if (rawId is String) {
+      parsedId = int.tryParse(rawId) ?? rawId.hashCode;
+    } else if (rawId is num) {
+      parsedId = rawId.toInt();
+    } else {
+      parsedId = 0;
+    }
+
     return User(
-      id: (json['id'] as num?)?.toInt() ?? 0,
+      id: parsedId,
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
       firstName: json['firstName'] as String? ?? '',
@@ -38,6 +52,7 @@ class User {
       contactNo: json['contactNo'] as String? ?? '',
       accessToken: (json['accessToken'] ?? json['token'] ?? '') as String,
       refreshToken: json['refreshToken'] as String? ?? '',
+      loginType: (json['loginType'] ?? json['provider'] ?? 'firebase') as String,
     );
   }
 
@@ -53,5 +68,6 @@ class User {
     'contactNo': contactNo,
     'accessToken': accessToken,
     'refreshToken': refreshToken,
+    'loginType': loginType,
   };
 }

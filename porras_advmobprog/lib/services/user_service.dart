@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
@@ -9,8 +10,8 @@ import 'package:flutter/material.dart';
 ValueNotifier<UserService> userService = ValueNotifier(UserService());
 
 class UserService {
-
   static const _userDataKey = 'authenticated_user';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<Map<String, dynamic>> loginUser(
     String username,
@@ -39,14 +40,76 @@ class UserService {
 
   Future<void> saveUserData(Map<String, dynamic> userData) async {
     final preferences = await SharedPreferences.getInstance();
-    final user = app_models.User.fromJson(userData);
+    final normalized = Map<String, dynamic>.from(userData);
+    final loginType = normalized['loginType'] ?? normalized['provider'];
+    if (loginType == null || (loginType is String && loginType.isEmpty)) {
+      normalized['loginType'] = 'firebase';
+    }
+    if (normalized['id'] is String && normalized['id'].isNotEmpty) {
+      normalized['id'] = normalized['id'].hashCode;
+    }
+    final user = app_models.User.fromJson(normalized);
     await preferences.setString(_userDataKey, jsonEncode(user.toJson()));
+  }
+
+  Future<void> syncFirebaseUserProfile() async {
+    final firebaseUser = currentUser;
+    if (firebaseUser == null) return;
+
+    final localData = await getUserData();
+    final name = (firebaseUser.displayName ?? '').trim();
+    final nameParts = name
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    final firstName = (localData['firstName'] as String? ?? '').trim();
+    final lastName = (localData['lastName'] as String? ?? '').trim();
+    final username = (localData['username'] as String? ?? name).trim();
+    final profile = <String, dynamic>{
+      'id': firebaseUser.uid,
+      'username': username,
+      'email': firebaseUser.email ?? '',
+      'avatar': firebaseUser.photoURL ?? '',
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    if (firstName.isNotEmpty || nameParts.isNotEmpty) {
+      profile['firstName'] = firstName.isNotEmpty ? firstName : nameParts.first;
+    }
+    if (lastName.isNotEmpty || nameParts.length > 1) {
+      profile['lastName'] = lastName.isNotEmpty
+          ? lastName
+          : nameParts.skip(1).join(' ');
+    }
+
+    await _firestore
+        .collection('users')
+        .doc(firebaseUser.uid)
+        .set(profile, SetOptions(merge: true));
   }
 
   Future<Map<String, dynamic>> getUserData() async {
     final preferences = await SharedPreferences.getInstance();
     final encoded = preferences.getString(_userDataKey);
-    if (encoded == null || encoded.isEmpty) return {};
+    if (encoded == null || encoded.isEmpty) {
+      final firebaseUser = currentUser;
+      if (firebaseUser == null) return {};
+      return {
+        'id': firebaseUser.uid.hashCode,
+        'username': firebaseUser.displayName ??
+            (firebaseUser.email ?? 'user').split('@').first,
+        'email': firebaseUser.email ?? '',
+        'firstName': '',
+        'lastName': '',
+        'gender': '',
+        'image': firebaseUser.photoURL ?? '',
+        'age': '',
+        'contactNo': '',
+        'accessToken': firebaseUser.uid,
+        'refreshToken': '',
+        'loginType': 'firebase',
+      };
+    }
 
     final decoded = jsonDecode(encoded);
     return decoded is Map<String, dynamic> ? decoded : {};
@@ -55,12 +118,30 @@ class UserService {
   Future<app_models.User> getUser() async {
     final data = await getUserData();
     if (data.isEmpty) throw Exception('No saved user session');
-    return app_models.User.fromJson(data);
+    final user = app_models.User.fromJson(data);
+    if (user.email.isEmpty && currentUser != null) {
+      final firebaseUser = currentUser!;
+      return app_models.User(
+        id: firebaseUser.uid.hashCode,
+        username: firebaseUser.displayName ??
+            (firebaseUser.email ?? 'user').split('@').first,
+        email: firebaseUser.email ?? '',
+        firstName: user.firstName,
+        lastName: user.lastName,
+        gender: user.gender,
+        image: firebaseUser.photoURL ?? user.image,
+        age: user.age,
+        contactNo: user.contactNo,
+        accessToken: firebaseUser.uid,
+        refreshToken: '',
+        loginType: 'firebase',
+      );
+    }
+    return user;
   }
 
-  // Enhancement 1: Persistent authentication.
-  // Checks saved login data before opening the main application.
   Future<bool> isLoggedIn() async {
+    if (currentUser != null) return true;
     final data = await getUserData();
     final token = data['accessToken'] ?? data['token'];
     return data['id'] != null && token is String && token.isNotEmpty;
@@ -106,12 +187,16 @@ Future<void> signOut() async {
 }
 
 Future<void> updateUsername({required String username}) async {
-  await currentUser?.updateDisplayName(username);
   final service = UserService();
   final data = await service.getUserData();
   if (data.isNotEmpty) {
     data['username'] = username;
+    data['loginType'] = data['loginType'] ?? 'dummyjson';
     await service.saveUserData(data);
+  }
+
+  if (currentUser != null) {
+    await currentUser?.updateDisplayName(username);
   }
 }
 

@@ -1,1 +1,2 @@
-# Lab Activity 4 added persistent login using a User model, UserService, and SharedPreferences. The splash screen checks the saved session, while the sign-in and profile screens handle login, user information, and logout. The cart uses the logged-in user’s ID to display the correct products through DummyJSON’s API.
+## Lab Activity 6 discussion
+Lab Activity 6 adds a Firebase chat feature using Firestore. It saves user profiles, shows other registered users, and loads messages for each chat. Users can search for others by name or email. The chat screen shows the selected user, previous messages, and allows new messages to be sent using the current user’s ID. It also includes message bubbles, a sending indicator, and message status.

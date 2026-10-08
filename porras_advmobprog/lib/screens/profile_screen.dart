@@ -36,6 +36,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _editUsername(User user) async {
+    if (!mounted) return;
+    if (user.loginType != 'firebase') {
+      _showMessage('DummyJSON users can only use the local profile data.');
+      return;
+    }
+
     final controller = TextEditingController(text: user.username);
     final username = await showDialog<String>(
       context: context,
@@ -59,17 +65,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     controller.dispose();
+    if (!mounted) return;
     if (username == null || username.isEmpty) return;
     try {
       await updateUsername(username: username);
       if (!mounted) return;
       setState(() => _userFuture = _loadUser());
     } catch (_) {
-      _showMessage('Could not update username.');
+      if (mounted) {
+        _showMessage('Could not update username.');
+      }
     }
   }
 
   Future<void> _changePassword() async {
+    final user = await _userFuture;
+    if (!mounted) return;
+    if (user.loginType != 'firebase') {
+      _showMessage('Password change is available only for Firebase accounts.');
+      return;
+    }
+
     final formKey = GlobalKey<FormState>();
     final currentController = TextEditingController();
     final newController = TextEditingController();
@@ -129,6 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     emailController.dispose();
     currentController.dispose();
     newController.dispose();
+    if (!mounted) return;
     if (confirmed != true) return;
     try {
       await resetPasswordFromCurrentPassword(
@@ -136,13 +153,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         newPassword: newPassword,
         email: email,
       );
-      _showMessage('Password changed successfully.');
+      if (mounted) {
+        _showMessage('Password changed successfully.');
+      }
     } catch (_) {
-      _showMessage('Could not change password. Check your credentials.');
+      if (mounted) {
+        _showMessage('Could not change password. Check your credentials.');
+      }
     }
   }
 
   Future<void> _deleteAccount(User user) async {
+    if (!mounted) return;
+    if (user.loginType != 'firebase') {
+      _showMessage('Account deletion is available only for Firebase accounts.');
+      return;
+    }
+
     final passwordController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -170,6 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     final password = passwordController.text;
     passwordController.dispose();
+    if (!mounted) return;
     if (confirmed != true || password.isEmpty) return;
     try {
       await deleteAccount(email: user.email, password: password);
@@ -177,13 +205,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/signin', (_) => false);
     } catch (_) {
-      _showMessage('Could not delete account. Check your password.');
+      if (mounted) {
+        _showMessage('Could not delete account. Check your password.');
+      }
     }
   }
 
   void _showMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    if (!mounted || !context.mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -223,6 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             SizedBox(height: 20.h),
+            _ProfileItem(label: 'Login type', value: user.loginType),
             _ProfileItem(label: 'Email', value: user.email),
             _ProfileItem(label: 'First name', value: user.firstName),
             _ProfileItem(label: 'Last name', value: user.lastName),

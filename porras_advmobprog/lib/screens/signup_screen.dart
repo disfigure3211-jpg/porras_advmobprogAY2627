@@ -69,10 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final email = _emailController.text.trim();
       final username = _usernameController.text.trim();
-      await createAccount(
-        email: email,
-        password: _passwordController.text,
-      );
+      await createAccount(email: email, password: _passwordController.text);
       await updateUsername(username: username);
       await UserService().saveUserData({
         'id': 0,
@@ -86,13 +83,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'image': '',
         'accessToken': currentUser?.uid ?? 'firebase-user',
         'refreshToken': '',
+        'loginType': 'firebase',
       });
+      await UserService().syncFirebaseUserProfile();
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not create account. Check your details.')),
+        const SnackBar(
+          content: Text('Could not create account. Check your details.'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -140,7 +141,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _contactController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: 'Contact number'),
+                  decoration: const InputDecoration(
+                    labelText: 'Contact number',
+                  ),
                   validator: (value) => _required(value, 'contact number'),
                 ),
                 SizedBox(height: 12.h),
@@ -181,11 +184,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     suffixIcon: IconButton(
                       tooltip: 'Show password',
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
-                      onPressed: () => setState(
-                        () => _obscurePassword = !_obscurePassword,
-                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   validator: _validatePassword,
@@ -204,7 +208,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             : Icons.visibility_off,
                       ),
                       onPressed: () => setState(
-                        () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
                       ),
                     ),
                   ),
